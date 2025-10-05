@@ -14,9 +14,16 @@ def square_list(mylist, result, square_sum):
     square_sum.value = sum(result) 
 
     # print result Array 
-    print("Result(in process p1): "+str(result[:])) 
+    print("Result(in process p1): "+str(result[:]))  #lo slice : serve per farti restituire
+    #gli elementi come una lista, in questo caso te li ranna tutti
+    #result[:] ti fa creare una copia
+    
+
     # print square_sum Value 
-    print("Sum of squares(in process p1): "+str(square_sum.value)) 
+    print(f"Sum of squares(in process p1): {square_sum.value}") 
+
+
+
 
 if __name__== "__main__":    
     # input list 
@@ -25,12 +32,15 @@ if __name__== "__main__":
 
     # creating Array of int data type with space for 4 integers 
     result = multiprocessing.Array('i', 4) 
+    #in questa riga ho creato una variabile array di 4 elementi interi
 
     #la libraria multiprocessing possiede anche l' oggetto Array, Value oltre
     #al già incontrato Process
 
     # creating Value of int data type 
-    square_sum = multiprocessing.Value('i')  
+    square_sum = multiprocessing.Value('i')   #qui sto creando una variabile
+    #condivisa dai processi di tipo intero
+    
 
     #esiste una classe chiamata multiprocessing.Value che ha come attributo value
     #per questo utilizzo square_sum.valore()
@@ -38,6 +48,7 @@ if __name__== "__main__":
 
     # creating new process 
     p1 = multiprocessing.Process(target=square_list, args=(mylist, result, square_sum)) 
+    #ricordarsi di esplicitare gli argomenti della funzione mylist, result, square_sum come args
     
     # starting process 
     p1.start() 
@@ -48,5 +59,8 @@ if __name__== "__main__":
     print("Result(in main program): "+str(result[:])) 
     # print square_sum Value 
     print("Sum of squares(in main program): "+str(square_sum.value)) 
-    
+
+    #qui il main program restituisce il solito risultato del processo 
+    #poichè prima in comunication1.py avevo una variabile globale mentre qui result 
+    #e square_sum non vengono mai copiati
 
