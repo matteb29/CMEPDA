@@ -46,7 +46,7 @@ class Timer(object):
             print(f"{self.name} ")
 
         self.tempo_impiegato =  time.time() - self.tstart
-        print(f"tempo impiegato: {(time.time() - self.tstart)}")
+        print(f"tempo impiegato: {(time.time() - self.tstart)} \n")
 
 
         #chiamo il metodo output della classe timer
@@ -138,9 +138,9 @@ def genera_lista():
 
     nums = []
 
-    #la consegna dice 2.500.000.000 ma ci mette una marea quindi mi limito a fare solo
+    #la consegna dice 2.500.000 ma ci mette una marea quindi mi limito a fare solo
     #una lista di 8 numeri
-    for i in range(100000, 900000, 100000):
+    for i in range(100000, 2500000, 100000):
 
         nums.append(i)
 
@@ -204,7 +204,7 @@ def algoritmo_threads(num_threads):
 
     for n in range(num_threads):
 
-        sottolista = lista_numeri[n*chunksize:chunksize*(n+1)]
+        sottolista = lista_numeri[ n*chunksize : chunksize * (n+1)]
 
         thread = threading.Thread(target = dizionario_somma_numeri_primi, args = (sottolista, ))
 
@@ -219,27 +219,30 @@ def algoritmo_threads(num_threads):
 
 # MAIN
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
 
-    serial = Timer("\n usando la programmazione seriale: ")
+    #serial = Timer("usando la programmazione seriale: ")
 
     #per utlizzare il metodo __start__ e __end__ dell' oggetto
     #utilizzo la chiamata con with oggetto
-    with serial as qq:
-        algoritmo_seriale()
+    #with serial as qq:
+       # algoritmo_seriale()
 
-    parallelo_processi = Timer("\n usando la progrmmazione parallela con i processi: ")
+
+    parallelo_processi = Timer("usando la progrmmazione parallela con i processi: ")
 
     with parallelo_processi as qq:
-        #faccio 1 numeor per ogni processo
+
+        #faccio 1 numero della lista per ogni processo
+
         algoritmo_multiprocessi(8)
 
 
-    parallelo_threads = Timer("\n usando la programmazione parallela con i threads: ")
+    #parallelo_threads = Timer("usando la programmazione parallela con i threads: ")
 
-    with parallelo_threads as qq:
+    #with parallelo_threads as qq:
 
-        algoritmo_threads(8)
+        #algoritmo_threads(8)
 
 
     
