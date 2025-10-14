@@ -5,7 +5,7 @@
 
 
 
-//codice da far rannare alla cpu dove gestisco allocazione della memoria nella GPU,
+//funzione da far rannare alla cpu dove gestisco allocazione della memoria nella GPU,
 //copia dei dati da cpu a GPU, chiamata del kernel e copia dei risultati da GPU a CPU
 
 void MatMul(const Matrix A, const Matrix B, Matrix C) {
@@ -34,11 +34,16 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
   // 2° compito della CPU: devo allocare memoria nella GPU
 
 
+
+  //sizeof(float) restituisce un valore di tipo size_t, sizeof(float) sono 4 byte
+
   size_t size = A.width * A.height * sizeof(float); //questa variabile è utilizzata
   //per definire quanta memoria devo allocare, so che ogni elemento delle matrici è un float che 
   //avrà un peso definito da sizeof(float). Dovendo allocare memoria per una matrice di dimensioni A.width, A.height
   //allora avrò un numero di elementi pari a (A.width * A.height)
   //segue che la formula per definire quanta memoria allocare non puà che essere questa soprariportata
+
+
 
   //devo allocare memoria nella GPU, la memoria dove la alloco?
   //la alloco in uno spazio che parte con l' indirizzo del primo elemento del vettore d_A.elements. 
@@ -153,8 +158,10 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
   //elemento della matrice C cioè per ogni elemento da calcolare
   // 1 thread = calcolo di 1 elemento di matrice C
 
+
+
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-  //ricordo BLOCK_SIZE = 16
+  //ricordo BLOCK_SIZE = 16 quindi ho 256 threads in ogni blocco (quindi 32 warp)
   //definisco qui un blocco bidimensionale
   //in CUDA non esiste un tipo dim2, perciò uso dim3 che è un tipo generico 3D con campi x, y, z 
   //anceh per generare un blocco 2D (si genera semplicemente ignorando la componente z)
@@ -172,9 +179,9 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
 
 //la quantità B.width / dimBlock.x indica quanti blocchi servono lungo la dimensione x
 //tuttavia questo può non essere un numero intero e quindi aggiungo (dimBlock.x - 1)/dimBlock.x
-//per arrotondare per eccesso ((dimBlock.x - 1)/dimBlock.x) è un numero minore in (0,1)
-//Esempio: B.width = 33 ; BLOCK_SIZE = 16
+//per arrotondare per eccesso
 //allora ho (33 + 16 - 1) / 16 = 48 / 16 = 3 blocchi su una dimensione
+//questo è una formula che ti aggiunge sempre un blocco quando ho un numero non intero di blocchi
 
   dim3 dimGrid((B.width + dimBlock.x - 1) / dimBlock.x,
 
@@ -194,6 +201,11 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
   // sotto c'è il kernel MatMulKernel
   MatMulKernel<<<dimGrid, dimBlock>>>(d_A, d_B, d_C);
 
+  //dimGrid è quanti blocchi ha la griglia
+  //dimBlock è quanti threads ha il blocco
+
+
+
   err = cudaThreadSynchronize();
   //cudaThreadSynchronize() serve per aspettare che tutti i thread abbiano finito
   //di lavorare prima di procedere (ha senso perchè prima di fermare il tempo di esecuzione con cudaEventRecord(stop)
@@ -201,11 +213,16 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
   //la funzione ritorna cudaSuccess	se  kernel completato senza errori
   //oppure ritorna cudaErrorLaunchFailure	se il kernel ha fallito durante l’esecuzione
 
+  //dice alla CPU di aspettare che la GPU abbia finito l' esecuzione di tutti i thread prima di procedere a fare altro
+
 
 //stop time
-  cudaEventRecord(stop); //salva il timestamp sulla GPU
-  cudaEventSynchronize(stop); //serve a dire alla CPU di aspettare che la GPU abbia registrato stop prima di proseguire
-  //senza cudaEventSynchronize, il calcolo del tempo(che viene eseguito sulla CPU)
+
+  cudaEventRecord(stop); //salva il timestamp sulla GPU, registra l'ora corrente 
+  //dell'orologio interno della GPU e la associa all'oggetto stop (che è un cudaEvent_t)
+
+  cudaEventSynchronize(stop); //serve a dire alla CPU di aspettare che la GPU abbia registrato lo stop prima di proseguire oltre
+  //senza cudaEventSynchronize, il calcolo del tempo (che viene eseguito sulla CPU)
   //potrebbe essere errato perché stop potrebbe non essere ancora stato registrato
 
   cudaEventElapsedTime(&time, start, stop); //calcola nella CPU la differenza in millisecondi tra start, stop e la inserisce in time
@@ -237,6 +254,7 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
   cudaFree(d_A.elements);
   cudaFree(d_B.elements);
   // cudaFree(d_C.elements);
+
 }
 
 
@@ -251,6 +269,9 @@ void MatMul(const Matrix A, const Matrix B, Matrix C) {
 __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C) {
 
 
+  //devi scrivere codice generico eseguito da ogni thread in parallelo
+
+
   // Each thread computes one element of C, by accumulating results into Cvalue
 
   //quindi faccio la moltiplicazioni tra matrici
@@ -259,14 +280,23 @@ __global__ void MatMulKernel(Matrix A, Matrix B, Matrix C) {
   
   float Cvalue = 0.0;
 
+
+  //coordinata y del thread in esecuzione
   int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+  //coordinata x del thread in esecuzione
   int col = blockIdx.x * blockDim.x + threadIdx.x;
 
+
   if(row > A.height || col > B.width) return; // or si indica con ||
+
  //se almeno una delle due è vera, il thread esce subito con return
  //infatti la coordinata riga del thread non può essere più grande della A.height 
  //vorrebbe dire che sono fuori dalla matrice che voglio calcolare
   //quindi questa riga serve per evitare che thread “extra” calcolino fuori dai limiti della matrice
+  //ti salvi cosi dai thread in più generati per eccesso con (B.width + dimBlock.x - 1) / dimBlock.x,
+
+
 
   for (int e = 0; e < A.width; ++e)
 
@@ -303,7 +333,7 @@ int main(int argc, char* argv[]){
 
 
 
-  //char* argv[] è un array parole
+  //char* argv[] è un array parole (un puntatore di puntatori)
   //char parola[] è un array di caratteri cioè una parola
   // in C scrivere char* argv[] = char** argv
   //argv[i] è la parola i-esima
@@ -420,5 +450,6 @@ int main(int argc, char* argv[]){
   }
   printf("\n");
   */
+
 
 }
