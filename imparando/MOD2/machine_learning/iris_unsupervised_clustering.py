@@ -5,10 +5,15 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 
+sns.set()
 
 
 iris = sns.load_dataset("iris")
 iris_np = np.array(iris)
+
+sns.pairplot(iris, hue = "species", height = 1.5 )
+
+
 
 
 x_iris = iris_np[:, 0: -1]
