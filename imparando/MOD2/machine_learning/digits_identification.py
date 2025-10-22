@@ -6,6 +6,7 @@ from sklearn.manifold import Isomap
 
 
 
+
 digits = load_digits() 
 print(digits.images.shape) #1797 campioni ciascuno formato da una griglia 8x8
 #ovvero ho 1797 immagini di 8 pixel x 8 pixel cioè ogni dato ha 64 feature
@@ -127,3 +128,7 @@ plt.clim(-0.5, 9.5)
 
 
 plt.show()
+
+
+
+
