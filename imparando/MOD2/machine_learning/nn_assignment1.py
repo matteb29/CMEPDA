@@ -57,53 +57,82 @@ xx1, xx2 = np.meshgrid(np.arange(0, 1, 0.01 ), np.arange(0, 1, 0.01))
 c = y è per colorare in base al valore corrispondente nell' array y
 "k" è il bordo nero dei punti"""
 
+#questo se voglio disegnare i dati
+"""
 plt.figure()
 plt.scatter(matrix[:, 0], matrix[:, 1], c = y , cmap = cm_bright, edgecolors = "k")
 
 plt.contourf(xx1, xx2, (theFunction(xx1, xx2)).reshape(xx1.shape), cmap = plt.cm.RdBu, alpha = .8)
 
+"""
+
 """con plt.contourf coloro i pixel del grafico, in particolare applico la funzione a tutti i punti di xxx1
 e a tutti i punti di xx2 così da colorare tutto il piano cartesiano in base alla funzione, FORSE è un check per vedere 
 se l' assegnazione fatta sui punti casuali è corretta o meno"""
 
-
-
-
-
+#INPUT
 layer_input = Input(shape = (2,)) #numero di neuroni iniziali è uguale al numero di feature: quindi il numero di colonne
-hidden_layer = Dense(10, activation = "relu")(layer_input)
-layer_output = Dense(1, activation = "sigmoid")(hidden_layer)
+
+# 4 HIDDEN
+hidden_layer1 = Dense(4, activation = "relu")(layer_input)
+hidden_layer2 = Dense(4, activation = "relu")(hidden_layer1)
+hidden_layer3 = Dense(4, activation = "relu")(hidden_layer2)
+hidden_layer4 = Dense(4, activation = "relu")(hidden_layer3)
+
+layer_output = Dense(1, activation = "sigmoid")(hidden_layer4)
 
 rete = Model(inputs = layer_input, outputs = layer_output )
 
 #per farmi stampare le caratteristiche della rete
 rete.summary()
 
+#per dire come voglio impostare le caratteristiche della rete
 rete.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"])
 
-accuracy = rete.evaluate(matrix, y, verbose=0)
-#accuracy è un array di due elementi, il valore della loss raggiunto, il secondo è la precisione raggiunta
+risultati_validation = rete.evaluate(matrix, y, verbose=0)
+#accuracy è un array di due elementi: il primo è il valore della loss raggiunto, il secondo è la precisione raggiunta
 
-print(f"Precisione:{accuracy}")
 
-history = rete.fit(matrix, y, validation_split = 0.5, epochs = 200, verbose = 0)
+risultati = rete.fit(matrix, y, validation_split = 0.5, epochs = 200, verbose = 0)
 
 """verbose = 0 per non stampare una righa ad ogni epoca
 matrix sono i dati di input mentre y sono le etichette che la rete dovrà indovinare
 i dati di input e le etichette venogno splitatti in 2 set per fare la fase di training e quella di validation
+in particolare validation_split mi dice la percentuale di dati da usare per il validation.
+L' intero processo di fit chiamato con rete.fit restituisce l' oggetto che io chiamo history
+che posso pensare come un record dell' addestramento, contenente info sui valori di loss function e su altre metriche
+
+"""
+
+print(f" Chiavi del dizionario restituito da rete.fit: {risultati.history.keys()}")
+
+"""
+l' oggetto history che ci facciamo restituire da rete.fit contiene un dizionario chiamato anch' esso history, 
+usando il metodo -keys()- mi faccio stampare le chiavi del dizionario che saranno le metriche di cui tengo traccia durante il training
+del tipo: loss, val_loss che sono rispettivamente la loss sul set di trainign e la loss sul set di validation
 
 """
 
 
+#print(risultati.history["loss"])
 
-print(history.history.keys())
-print(history.history["loss"])
+#con questa riga mi faccio stampare i valori della loss sul set di validation
+#print(risultati.history["val_loss"])
 
 
 print("Plotting training vs validation...")
+
+
+#creo una nuova figura
 plt.figure()
-plt.plot(history.history["loss"], label = "Training loss" )
-plt.plot(history.history["val_loss"], label = "Validation loss")
+
+#faccio il plot dei valori della loss sul training set, plt.plt riceve questa lista di valori 
+#e sull' asse x ci mette gli indici della lista
+plt.plot(risultati.history["loss"], label = "Training loss" )
+
+#faccio il plot dei valori della loss sul validation set
+plt.plot(risultati.history["val_loss"], label = "Validation loss")
+
 
 plt.xlabel("Epoche")
 plt.ylabel("Loss")
@@ -112,7 +141,41 @@ plt.legend()
 
 plt.show()
 
+print(f" Risultati sul set di validation: {risultati_validation[1]}")
 
+
+#proviamo il modello sui punti xx1 e xxx2 usando come set di test,
+#ricordiamo che si possono dividere i set in: training, validation, test
+
+testSet = np.stack((xx1.flatten(), xx2.flatten()), axis = 1 ) #axis = 1 li impila come colonne, axis = 0 li avrebbe impilati come colonne
+#metodo flatten serve per far diventare la matrice un array
+
+label_test = theFunction(testSet[:,0], testSet[:,1])
+
+
+predizioni = rete.predict(testSet)
+
+"""
+    Ricordiamo che il metodo evaluate serve per farsi restituire le prestazioni del modello su un set
+    di dati a seguito della fase di training, ma su cui conosco le etichette.
+    Il metodo .predict() invece mi serve per quando non conosco le etichette
+
+
+"""
+
+print(f"Risultati sul set di test: {predizioni}" ) #questo contiene delle probabilitàperciò facciamo np.round, 
+
+"""
+
+il motivo è che l' ultimo layer ha come activation function una sigmoide e quindi il numero che
+restituisce è compreso tra 0 e 1: interpretato come la fiducia del modello che il dato appartenga alla classe 1: TRUE
+con cui 0.001 è quasi sicuro che il dato appartenza alla classe 0: FALSE
+
+"""
+
+
+precisione_test = np.mean(np.round(predizioni) == label_test)
+print(f"Precisione sul set di test {precisione_test}")
 
 
 
