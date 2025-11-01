@@ -1,3 +1,6 @@
+#RETE NEURALE PER UN PROBLEMA DI CLASSIFICAZIONE
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -74,26 +77,36 @@ se l' assegnazione fatta sui punti casuali è corretta o meno"""
 layer_input = Input(shape = (2,)) #numero di neuroni iniziali è uguale al numero di feature: quindi il numero di colonne
 
 # 4 HIDDEN
-hidden_layer1 = Dense(4, activation = "relu")(layer_input)
-hidden_layer2 = Dense(4, activation = "relu")(hidden_layer1)
-hidden_layer3 = Dense(4, activation = "relu")(hidden_layer2)
-hidden_layer4 = Dense(4, activation = "relu")(hidden_layer3)
+hidden_layer1 = Dense(50, activation = "relu")(layer_input)
+hidden_layer2 = Dense(50, activation = "relu")(hidden_layer1)
+hidden_layer3 = Dense(50, activation = "relu")(hidden_layer2)
+hidden_layer4 = Dense(50, activation = "relu")(hidden_layer3)
 
 layer_output = Dense(1, activation = "sigmoid")(hidden_layer4)
 
+
+#il comando model mette insieme i vari strati e restituisce una rete neurale da allenare
 rete = Model(inputs = layer_input, outputs = layer_output )
 
 #per farmi stampare le caratteristiche della rete
 rete.summary()
 
-#per dire come voglio impostare le caratteristiche della rete
+#per dire come voglio impostare le caratteristiche della rete, adam per backpropagation
 rete.compile(loss = "binary_crossentropy", optimizer = "adam", metrics = ["accuracy"])
 
-risultati_validation = rete.evaluate(matrix, y, verbose=0)
-#accuracy è un array di due elementi: il primo è il valore della loss raggiunto, il secondo è la precisione raggiunta
+
+risultati_prima_training = rete.evaluate(matrix, y, verbose = 0)
+
+print(f"Risultati prima del traininng di Loss e accuracy: {risultati_prima_training}")
 
 
-risultati = rete.fit(matrix, y, validation_split = 0.5, epochs = 200, verbose = 0)
+
+
+risultati_training = rete.fit(matrix, y, validation_split = 0.5, epochs = 500, verbose = 0)
+
+
+#vediamo come cambia la rete dopo il training
+rete.summary()
 
 """verbose = 0 per non stampare una righa ad ogni epoca
 matrix sono i dati di input mentre y sono le etichette che la rete dovrà indovinare
@@ -104,7 +117,9 @@ che posso pensare come un record dell' addestramento, contenente info sui valori
 
 """
 
-print(f" Chiavi del dizionario restituito da rete.fit: {risultati.history.keys()}")
+
+
+print(f" Chiavi del dizionario restituito da rete.fit: {risultati_training.history.keys()}")
 
 """
 l' oggetto history che ci facciamo restituire da rete.fit contiene un dizionario chiamato anch' esso history, 
@@ -128,10 +143,10 @@ plt.figure()
 
 #faccio il plot dei valori della loss sul training set, plt.plt riceve questa lista di valori 
 #e sull' asse x ci mette gli indici della lista
-plt.plot(risultati.history["loss"], label = "Training loss" )
+plt.plot(risultati_training.history["loss"], label = "Training loss" )
 
 #faccio il plot dei valori della loss sul validation set
-plt.plot(risultati.history["val_loss"], label = "Validation loss")
+plt.plot(risultati_training.history["val_loss"], label = "Validation loss")
 
 
 plt.xlabel("Epoche")
@@ -139,9 +154,14 @@ plt.ylabel("Loss")
 
 plt.legend()
 
-plt.show()
 
-print(f" Risultati sul set di validation: {risultati_validation[1]}")
+
+
+risultati_validation = rete.evaluate(matrix, y, verbose=0)
+#risultati validation è un array di due elementi: il primo è il valore della loss raggiunto, il secondo è la precisione raggiunta
+
+print(f" Valore della loss sul set di validation: {risultati_validation[0]}")
+print(f"Valore della accuracy sul set di validation: {risultati_validation[1]}")
 
 
 #proviamo il modello sui punti xx1 e xxx2 usando come set di test,
@@ -163,7 +183,7 @@ predizioni = rete.predict(testSet)
 
 """
 
-print(f"Risultati sul set di test: {predizioni}" ) #questo contiene delle probabilitàperciò facciamo np.round, 
+print(f"Risultato della predizione della rete sul primo dato del test set: {predizioni[0]}" ) #questo contiene delle probabilità perciò facciamo np.round, 
 
 """
 
@@ -174,11 +194,16 @@ con cui 0.001 è quasi sicuro che il dato appartenza alla classe 0: FALSE
 """
 
 
-precisione_test = np.mean(np.round(predizioni) == label_test)
-print(f"Precisione sul set di test {precisione_test}")
+accuracy_test = np.mean(np.round(predizioni) == label_test)
+print(f"Accuracy sul set di test {accuracy_test}")
 
 
+plt.figure()
 
+plt.scatter(matrix[:, 0], matrix[:, 1], c = y , cmap = cm_bright, edgecolors = "k")
+plt.contourf(xx1, xx2, predizioni.reshape(xx1.shape), cmap = plt.cm.RdBu, alpha = .8)
+
+plt.show()
 
 
 
