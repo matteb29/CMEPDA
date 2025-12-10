@@ -170,6 +170,8 @@ print(f"Valore della accuracy sul set di validation: {risultati_validation[1]}")
 testSet = np.stack((xx1.flatten(), xx2.flatten()), axis = 1 ) #axis = 1 li impila come colonne, axis = 0 li avrebbe impilati come colonne
 #metodo flatten serve per far diventare la matrice un array
 
+#facciamo il .flatten() perchè le feed forward network possono lavorare solo con vettori e non con matrici
+
 label_test = theFunction(testSet[:,0], testSet[:,1])
 
 

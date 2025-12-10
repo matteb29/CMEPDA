@@ -128,7 +128,7 @@ rete_densa.compile(loss = "mse", optimizer = "adam", metrics = ["mse"])
 rete_densa.summary()
 
 
-risultati_rete_densa = rete_densa.fit(dati_training, y_training, validation_data = (dati_validation, y_validation), epochs = 200, verbose = 0)
+risultati_rete_densa = rete_densa.fit(dati_training, y_training, validation_data = (dati_validation, y_validation), epochs = 30, verbose = 0)
 
 
 plt.figure()
