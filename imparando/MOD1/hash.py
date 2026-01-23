@@ -3,10 +3,7 @@ print(x)
 
 ##stampa l' indirizzo di memoria dell' oggetto
 
-d = { "Luca":  [25, 30, 28],
-      "Marco": [30, 29, 30],
-      "Anna":  [29, 28, 27] 
-    }
+d = {"Luca": [25, 30, 28], "Marco": [30, 29, 30], "Anna": [29, 28, 27]}
 
 voti_luca = d["Luca"]
 voti_marco = d["Marco"]
@@ -30,3 +27,7 @@ print(d)
 
 for i, j in zip(range(len(month)), range(len(giorni))):
     print(i, j)
+
+
+my_dict = {}
+print(id(my_dict))

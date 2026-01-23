@@ -1,6 +1,7 @@
-import datetime 
+import datetime
+
 import matplotlib.pytplot as plt
-import numpy as np 
+import numpy as np
 
 t0 = datetime.datetime.now()
 
@@ -25,8 +26,10 @@ print(f"tempo impiegato: {t} ")
 
 
 import datetime
+
 import matplotlib.pyplot as plt
 import numpy as np
+
 x=[]
 for j in range(1000):
     t0=datetime.datetime.now()

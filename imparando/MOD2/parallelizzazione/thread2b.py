@@ -1,46 +1,44 @@
-import threading 
+import threading
 
-#solito programma di thread2 ma questa volta si utilizza il lock
-
-
+# solito programma di thread2 ma questa volta si utilizza il lock
 
 
-# global variable x 
+# global variable x
 x = 0
 
-def increment(): 
-    global x 
+
+def increment():
+    global x
     x += 1
 
-def thread_task(lock): 
+
+def thread_task(lock):
     for _ in range(100000):
         lock.acquire()
-        increment() 
+        increment()
         lock.release()
 
-def main_task(): 
-    global x 
-    # setting global variable x as 0 
+
+def main_task():
+    global x
+    # setting global variable x as 0
     x = 0
-    # creating a lock 
-    lock = threading.Lock() 
+    # creating a lock
+    lock = threading.Lock()
 
-    # creating threads 
-    t1 = threading.Thread(target=thread_task, args=(lock,)) 
-    t2 = threading.Thread(target=thread_task, args=(lock,)) 
-    
-    # start threads 
-    t1.start() 
-    t2.start() 
-    # wait until threads finish their job 
-    t1.join() 
-    t2.join() 
+    # creating threads
+    t1 = threading.Thread(target=thread_task, args=(lock,))
+    t2 = threading.Thread(target=thread_task, args=(lock,))
 
-
+    # start threads
+    t1.start()
+    t2.start()
+    # wait until threads finish their job
+    t1.join()
+    t2.join()
 
 
-#MAIN
-for i in range(10): 
-    main_task() 
-    print("Iteration {0}: x = {1}".format(i,x)) 
-
+# MAIN
+for i in range(10):
+    main_task()
+    print("Iteration {0}: x = {1}".format(i, x))

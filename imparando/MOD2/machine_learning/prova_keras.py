@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from keras.models import Sequential
 from keras.layers import Dense
+from keras.models import Sequential
 
 # URL AGGIORNATO: Questo link è stabile e funzionante
 url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.csv"
@@ -14,11 +14,10 @@ pima indians diabetes è un dataset famoso che contiene informazioni su donne so
 """
 
 
-
 # Definiamo i nomi delle colonne perché anche questo file non ha un'intestazione
-#l' ultima colonna "class" sarà la mia etichetta su cui alleno il modello
+# l' ultima colonna "class" sarà la mia etichetta su cui alleno il modello
 
-column_names = ['preg', 'plas', 'pres', 'skin', 'test', 'mass', 'pedi', 'age', 'class']
+column_names = ["preg", "plas", "pres", "skin", "test", "mass", "pedi", "age", "class"]
 
 """
 il dataset contiene info circa:
@@ -34,10 +33,6 @@ age = età
 """
 
 
-
-
-
-
 # Carichiamo il dataset direttamente dall'URL usando pandas
 dataset_pd = pd.read_csv(url, names=column_names)
 
@@ -51,7 +46,7 @@ X = dataset[:, 0:8]
 y = dataset[:, 8]
 
 
-# Definisci il modello model che è un' istanza della classe sequential che è una rete neurale 
+# Definisci il modello model che è un' istanza della classe sequential che è una rete neurale
 model = Sequential()
 
 
@@ -64,7 +59,7 @@ utilizziamo il metodo .add della classe sequential per aggiungere layer di input
  direzione in avanti
 
 """
-model.add(Dense(12, input_dim=8, activation='relu'))
+model.add(Dense(12, input_dim=8, activation="relu"))
 
 
 """
@@ -74,7 +69,7 @@ infatti 8 indica che in questo hidden layer ci sono 8 neuroni
 
 """
 
-model.add(Dense(8, activation='relu'))
+model.add(Dense(8, activation="relu"))
 
 
 """
@@ -82,12 +77,11 @@ terzo strato: output layer che prende in input gli 8 output degli 8 neuroni dell
 unico valore di output, infatti 1 indica che l' output layer è composto da un unico neurone
 
 """
-model.add(Dense(1, activation='sigmoid'))
-
+model.add(Dense(1, activation="sigmoid"))
 
 
 # Compila il modello
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
 
 """
@@ -181,7 +175,6 @@ se negativa vuol dire che se aumento il peso allora L diminuisce ---> il peso va
 """
 
 
-
 # Addestra il modello
 print("Inizio addestramento...")
 
@@ -195,11 +188,10 @@ poichè ho 10 epoche ripeterò l' addestramento sui 768 dati del database per 15
 """
 
 
-
 print("Addestramento completato.")
 
 # Valuta il modello
-accuracy = model.evaluate(X, y, verbose=0) # Aggiunto verbose=0 per pulizia
+accuracy = model.evaluate(X, y, verbose=0)  # Aggiunto verbose=0 per pulizia
 
 # Stampa l'accuracy
-print('Accuracy: %.2f%%' % (accuracy * 100))
+print("Accuracy: %.2f%%" % (accuracy * 100))

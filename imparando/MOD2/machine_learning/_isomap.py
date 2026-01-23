@@ -240,7 +240,7 @@ class Isomap(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
             n_jobs=self.n_jobs,
         ).set_output(transform="default")
 
-        if self.n_neighbors is not None: #se trova dei vicini
+        if self.n_neighbors is not None:  # se trova dei vicini
 
             nbg = kneighbors_graph(
                 self.nbrs_,
@@ -310,9 +310,6 @@ class Isomap(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
 
         self.embedding_ = self.kernel_pca_.fit_transform(G)
         self._n_features_out = self.embedding_.shape[1]
-
-
-
 
     def reconstruction_error(self):
         """Compute the reconstruction error for the embedding.
